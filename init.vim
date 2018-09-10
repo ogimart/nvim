@@ -75,7 +75,7 @@ let g:airline_theme='bubblegum'
 let g:jellybeans_overrides={
 \    'background': { 'ctermbg': 'none', '256ctermbg': 'none'},
 \}
-autocmd BufRead,BufNewFile * syn match parens /[\[\]{}()]/ | hi parens ctermfg=grey
+autocmd BufRead,BufNewFile * syn match parens /[\[\]{}()]/ | hi parens ctermfg=darkgrey
 hi MatchParen cterm=bold ctermbg=none ctermfg=white
 " FZF colors
 let g:fzf_colors =
