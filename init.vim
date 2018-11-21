@@ -3,35 +3,31 @@ call plug#begin('~/.local/share/nvim/plugged')
 " Search
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 " Airline & Color Schemes
-Plug 'w0ng/vim-hybrid'
+Plug 'andreypopp/vim-colors-plain'
 Plug 'vim-airline/vim-airline' | Plug 'vim-airline/vim-airline-themes'
 " External Async Processes
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'zchee/libclang-python3'
 Plug 'w0rp/ale'
 Plug 'skywind3000/asyncrun.vim'
-Plug 'jpalardy/vim-slime'
 Plug 'kassio/neoterm'
 " Git & Projects
 Plug 'jreybert/vimagit'
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-rooter'
 " Common Lisp
-Plug 'l04m33/vlime', {'rtp': 'vim/'}
+Plug 'kovisoft/slimv', {'for': 'lisp'}
 " C and C++
-Plug 'zchee/deoplete-clang'
-Plug 'Shougo/neoinclude.vim'
+Plug 'justmao945/vim-clang'
 " Clojure
 Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 " Python
-Plug 'zchee/deoplete-jedi'
 Plug 'davidhalter/jedi-vim', { 'for': 'python' }
 Plug 'plytophogy/vim-virtualenv', { 'for': 'python' }
 " Java & Kotlin
 Plug 'artur-shaik/vim-javacomplete2', { 'for': 'java' }
 Plug 'udalov/kotlin-vim', { 'for': 'kotlin' }
 " SQL
-Plug 'vim-scripts/dbext.vim', { 'for': 'sql' }
+Plug 'vim-scripts/dbext.vim'
+Plug 'lifepillar/pgsql.vim', { 'for': 'sql' }
 " Editing
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
@@ -42,6 +38,7 @@ call plug#end()
 set autoread
 set nospell
 set spelllang=en
+set clipboard=unnamed
 nmap <cr> o<esc>k
 
 " NO BACKUP
@@ -67,34 +64,14 @@ let g:netrw_winsize=25
 let g:netrw_altv=1
 
 " COLOR SCHEME
-set background=dark
-" let g:hybrid_custom_term_colors=1
-let g:hybrid_reduced_contrast=0
-colorscheme hybrid
-let g:airline_theme='bubblegum'
-let g:jellybeans_overrides={
-\    'background': { 'ctermbg': 'none', '256ctermbg': 'none'},
-\}
-autocmd BufRead,BufNewFile * syn match parens /[\[\]{}()]/ | hi parens ctermfg=darkgrey
-hi MatchParen cterm=bold ctermbg=none ctermfg=white
-" FZF colors
-let g:fzf_colors =
-  \ { 'fg':    ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'Normal'],
-  \ 'hl':      ['fg', 'Comment'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'Statement'],
-  \ 'info':    ['fg', 'PreProc'],
-  \ 'border':  ['fg', 'Ignore'],
-  \ 'prompt':  ['fg', 'Conditional'],
-  \ 'pointer': ['fg', 'Exception'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
-" \ 'bg+':     ['bg', 'Ignore'],
+set termguicolors
+set background=light
+colorscheme plain
+" autocmd BufRead,BufNewFile * syn match parens /[\[\]{}()]/ | hi parens ctermfg=darkgrey
+" hi MatchParen cterm=bold ctermbg=none ctermfg=black
 
 " AIRLINE
+let g:airline_theme='sol'
 set laststatus=2
 let g:airline_powerline_fonts=0
 let g:airline_left_sep=''
@@ -108,22 +85,28 @@ let g:rooter_resolve_links=1
 let g:rooter_silent_chdir=1
 
 " FZF & SEARCH
-let g:fzf_layout={'down': '~20%'}
 if executable('ag')
   set grepprg=ag\ --nogroup\ --nocolor
 endif
 let g:ale_set_highlights=0
+let g:fzf_layout={'down': '~20%'}
+autocmd! FileType fzf
+autocmd  FileType fzf set laststatus=0 noshowmode noruler
+  \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
 
 " COMMON LISP
+let g:slimv_python_version=3
+autocmd BufNewFile,BufRead *.asd set syntax=lisp
+
+" PYTHON
+" let g:python3_host_prog='~/.virtualenvs/nvim3/bin/python'
 
 " SQL
 let g:dbext_default_profile='pg'
 " let g:dbext_default_profile_name='type=PGSQL:user=:passwd=:dbname=:host='
 so ~/.config/nvim/sql/dbextprofile.vim
-
-" SLIME
-let g:slime_target="neovim"
-let g:slime_python_ipython=1
+let g:sql_type_default = 'pgsql'
+" let g:pgsql_pl = ["plpgsql" 'python']
 
 " COMMENTS
 autocmd FileType c setlocal commentstring=//\ %s
@@ -136,6 +119,11 @@ autocmd FileType kotlin setlocal commentstring=//\ %s
 augroup vimrc
   autocmd User AsyncRunStart call asyncrun#quickfix_toggle(8, 1)
 augroup end
+
+" PRETTY PRINT
+command! PrettyPrintJSON %!python -m json.tool
+command! PrettyPrintHTML !tidy -mi -html -wrap 0 %
+command! PrettyPrintXML !tidy -mi -xml -wrap 0 %
 
 " LEADER MAP
 let mapleader="\<space>"
@@ -150,11 +138,8 @@ nnoremap <leader>a :Ag<cr>
 nnoremap <leader>f :Files<cr>
 nnoremap <leader>l :Lines<space>
 nnoremap <leader>b :Buffers<cr>
-" Async run
-nnoremap <leader>R :AsyncRun<space>
-nnoremap <leader>t :AsyncRun pdflatex %<cr>
 " Git
-nnoremap <leader>m :Magit<cr>
+nnoremap <leader>gm :Magit<cr>
 nnoremap <leader>gg :Git<space>
 nnoremap <leader>gw :Gwrite<cr>
 nnoremap <leader>gs :Gstatus<cr>
@@ -162,3 +147,10 @@ nnoremap <leader>gd :Gvdiff<cr>
 nnoremap <leader>gc :Gcommit<cr>
 nnoremap <leader>gp :Gpush<space>
 nnoremap <leader>ge :Gvsplit<space>
+" Async run
+nnoremap <leader>R :AsyncRun<space>
+nnoremap <leader>L :terminal lein repl<cr>
+nnoremap <leader>U :AsyncRun lein uberjar<cr>
+nnoremap <leader>C :AsyncRun lein clean<cr>
+nnoremap <leader>T :AsyncRun pdflatex %<cr>
+nnoremap <leader>D :AsyncRun open -a "Marked 2" %<cr>

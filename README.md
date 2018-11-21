@@ -3,9 +3,9 @@
 My neovim configuration for:
 
     Common Lisp
-    C and C++ (clang)
     Clojure
     Python
+    C and C++ (clang)
     Kotlin
     Java
     SQL (postgresql)
